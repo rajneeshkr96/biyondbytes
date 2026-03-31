@@ -1,7 +1,6 @@
 // delete blog 
 import { dataBasePrisma } from "@/databasePrisma";
 import { NextRequest,NextResponse } from "next/server";
-import { currentRole } from "@/lib/authDet";
 
 export async function DELETE(request: NextRequest,context:{params:{id:string}}) {
   try {
