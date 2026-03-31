@@ -6,7 +6,7 @@ declare global {
 
 
 if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is not set");
+  console.warn("DATABASE_URL is not set");
 }
 
 export const dataBasePrisma = globalThis.prisma || new PrismaClient();
