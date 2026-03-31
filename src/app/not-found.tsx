@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-function notfound() {
+function NotFound() {
     return (
         <>
             <div className="static bottom-0-0 right-0 w-full flex md:flex-row flex-col items-center h-[70vh]">
@@ -1842,4 +1842,4 @@ function notfound() {
     )
 }
 
-export default notfound
+export default NotFound
