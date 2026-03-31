@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import { GoogleTagManager } from '@next/third-parties/google'
-import "./globals.css";
 import HomeLayout from "@/components/layoutComponents/HomeLayout/HomeLayout";
 import { ToastContainer } from 'react-toastify';
+// @ts-ignore
 import 'react-toastify/dist/ReactToastify.css';
+import "./globals.css";
 import ReduxProvider from "@/redux/Provider";
 import { auth } from "@/backend/auth/auth";
 import { SessionProvider } from "next-auth/react"
