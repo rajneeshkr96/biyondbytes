@@ -22,9 +22,7 @@ import { ErrorResponse, errorToastHandler } from '@/components/errorTostHandler'
 import { useRouter } from 'next/navigation'
 import ImageUploadModal from '@/components/UploadImage/UploadImage'
 import { useSession } from 'next-auth/react'
-import { json } from 'stream/consumers'
 import Loading from '@/app/loading'
-const animatedComponents = makeAnimated();
 
 interface Option {
   value: string;
@@ -51,6 +49,37 @@ const Page = () => {
   const searchParams = useSearchParams();
   const [content,setContent] = useState('');
   const [fullLoading,setFullLoading] = useState(false);
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      
+      Image,
+      Link.configure({
+        openOnClick: false,
+        autolink: true,
+      }),
+      Youtube.configure({
+        controls: false,
+      }),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+    ],
+    content: `
+      ${typeof window !== 'undefined' && localStorage?.getItem("content")}
+    `,
+  })
+
+  const animatedComponents = makeAnimated();
+  const debounced = useDebouncedCallback(
+    (val:{key:string,value:string }) => {
+      window.localStorage.setItem(val.key,val.value);
+    },
+    10000
+  );
 
   useEffect(() => {
 
@@ -97,6 +126,7 @@ const Page = () => {
           setPreImage({src: res.data.data.image.src,alt: res.data.data.image.alt});
           const content = JSON.parse(res.data.data.content);
           setContent(content);
+          editor?.commands.setContent(content);
         }
         setFullLoading(false);
       }
@@ -106,40 +136,13 @@ const Page = () => {
     }
   }, [param.operation,searchParams,router,session.data?.user.role]);
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      
-      Image,
-      Link.configure({
-        openOnClick: false,
-        autolink: true,
-      }),
-      Youtube.configure({
-        controls: false,
-      }),
-      Table.configure({
-        resizable: true,
-      }),
-      TableRow,
-      TableHeader,
-      TableCell,
-    ],
-    content: `
-      ${typeof window !== 'undefined' && localStorage?.getItem("content")}
-    `,
-  })
+
   const handleChange = (options: readonly Option[] | null) => {
     setSelectedTags(options ? Array.from(options) : []);
   };
 
 
-  const debounced = useDebouncedCallback(
-    (val:{key:string,value:string }) => {
-      window.localStorage.setItem(val.key,val.value);
-    },
-    10000
-  );
+
 
   
   useEffect(() => {
@@ -154,15 +157,27 @@ const Page = () => {
     return () => clearInterval(intervalId);
   }, [editor]);
   
+  useEffect(() => {
+    if(editor && !!content && param.operation === "edit" && (!!localStorage.getItem("content") || localStorage.getItem("content") === "<p></p>" )){
+      editor.commands.setContent(content);
+    }
+  }, [editor,content]);
   
   if (!editor) {
     return null
   }
   
-
-  if(param.operation === "edit" && !localStorage.getItem("content")){
-    editor.commands.setContent(content);
+  const clearData = (msg:string,path:string)=>{
+    toast.success(msg)
+    localStorage.setItem("title", "")
+    localStorage.setItem("heroImage", "")
+    localStorage.setItem("alt", "")
+    localStorage.setItem("content", "")
+    localStorage.setItem("metaTitle", "")
+    localStorage.setItem("metaDes", "")
+    router.push(`/post/${path}`);
   }
+
   const publicBlog = async () => {
     try {
       setLoading(true);
@@ -181,14 +196,7 @@ const Page = () => {
         tags: tags
       })
       if(res.data.success){
-        toast.success("published.....")
-        localStorage.setItem("title","")
-        localStorage.setItem("heroImage","")
-        localStorage.setItem("alt","")
-        localStorage.setItem("metaTitle","")
-        router.push(`/post/${res.data.data.slug}`);
-        localStorage.setItem("metaDes","")
-        localStorage.setItem("content","")
+        clearData("Blog Published Successfully",res.data.data.slug)
       }
 
       setLoading(false);
@@ -199,8 +207,8 @@ const Page = () => {
   }
   const updatePost = async () => {
     try {
-      const id = searchParams.get('id');
-      if(!id){
+      const slug = searchParams.get("slug");
+      if(!slug){
         toast.error("blog not found");
         router.back();
         return;
@@ -213,7 +221,7 @@ const Page = () => {
       }
       const tags = selectedTags.map(tag =>tag.value);
       const res = await axios.put("/api/blog/writer/update", {
-        id:id,
+        slug:slug,
         title: title,
         image: preImage,
         content: JSON.stringify(editor.getHTML()),
@@ -222,14 +230,7 @@ const Page = () => {
         tags: tags
       })
       if(res.data.success){
-        toast.success("edit successfully")
-        localStorage.setItem("title","")
-        localStorage.setItem("heroImage","")
-        localStorage.setItem("alt","")
-        localStorage.setItem("content","")
-        localStorage.setItem("metaTitle","")
-        localStorage.setItem("metaDes","")
-        router.push(`/post/${res.data.data.slug}`);
+        clearData("edit successfully",res.data.data.slug)
       }
 
       setLoading(false);

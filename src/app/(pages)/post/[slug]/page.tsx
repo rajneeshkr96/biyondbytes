@@ -27,7 +27,8 @@ type Props = {
 
  const getData = cache(async (slug:string,userId?:string) => {
   try {
-    const res = await axios.get(`${process.env.BASE_URL}/api/blog/${slug}/${userId}`);
+    const baseURL = process.env.BASE_URL || "http://localhost:3000"
+    const res = await axios.get(`${baseURL}/api/blog/${slug}/${userId}`);
     return res;
     
   } catch (error) {

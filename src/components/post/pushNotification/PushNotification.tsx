@@ -7,14 +7,8 @@ const PushNotification = () => {
   const { wait,fcmToken, notificationPermissionStatus,setNotificationPermissionStatus } = useFcmToken();
   const [hide,setHide] = useState(false);
   const saveToken = async (token: string) => {
-    let country
-    try {
-      const data = (await axios.get("https://api.country.is/")).data;
-      country = data.country;
-    } catch (error) {
-      country = null;
-    }
-    await axios.post("/api/pushNotification", { token: token,country:country });
+
+    await axios.post("/api/pushNotification", { token: token});
   };
   useEffect(() => {
     if ('serviceWorker' in navigator) {

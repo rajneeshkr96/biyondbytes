@@ -1,33 +1,27 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
 name: Node.js CI
 
 on:
   push:
     branches: [ "main" ]
 
-
 jobs:
   build:
-
     runs-on: self-hosted
-
     strategy:
       matrix:
-        node-version: [20.16.0]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version: [20.17.0]
+
     env:
       BASE_URL: ${{ secrets.BASE_URL }}
+      NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      DATABASE_COMPASS: ${{ secrets.DATABASE_COMPASS }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-      # GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
-      # GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
+      GIT_CLIENT_ID: ${{ secrets.GIT_CLIENT_ID }}
+      GIT_CLIENT_SECRET: ${{ secrets.GIT_CLIENT_SECRET }}
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-      UPLOADTHING_SECRET: ${{ secrets.UPLOADTHING_SECRET }}
       UPLOADTHING_APP_ID: ${{ secrets.UPLOADTHING_APP_ID }}
+      UPLOADTHING_SECRET: ${{ secrets.UPLOADTHING_SECRET }}
 
     steps:
     - uses: actions/checkout@v4
@@ -35,10 +29,16 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
+        cache: 'yarn'
+    - name: Install Dependencies
+      run: yarn install --frozen-lockfile
+    - name: Create .env file
+      run: |
+        echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
+        echo "NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}" >> .env
+    - name: Build Project
+      run: yarn build
     - name: Change Directory
-      run: cd /home/biyond/actions-runner/_work/biyondbytes/biyondbytes
-    - run: pm2 restart 0
-
+      run: cd /home/biyondbytes/biyondblogs/actions-runner/_work/biyondbytes/biyondbytes || exit 1
+    - name: Restart Application
+      run: pm2 restart biyondblogs

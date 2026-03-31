@@ -28,8 +28,9 @@ export default async function Home() {
   let blog;
   const id: string = await currentUserId();
   let success = false;
+  const baseURL = process.env.BASE_URL || "http://localhost:3000"
   try {
-    const res = await axios.get(`${process.env.BASE_URL}/api/blog/all?id=${id}&sort=-createdAt&fields=id,tags,likesCount,author,title,metaDesc,image,createdAt,slug,readTime`);
+    const res = await axios.get(`${baseURL}/api/blog/all?id=${id}&sort=-createdAt&fields=id,tags,likesCount,author,title,metaDesc,image,createdAt,slug,readTime`);
     if (res.data.success) {
       blog = res.data.data;
       success = true;

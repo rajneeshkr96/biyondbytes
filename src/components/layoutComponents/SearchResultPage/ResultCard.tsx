@@ -24,7 +24,7 @@ const ResultCard = () => {
   };
   useEffect(() => {
     getBlogData();
-  }, [blog]);
+  }, [blog,getBlogData]);
   return (
     <div className="grid grid-cols-3 max-xl:grid-cols-2 max-md:grid-cols-1 max-sm:grid-cols-1">
       {blog.map((data: BlogcardProps) => (
