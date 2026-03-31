@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { dataBasePrisma } from "@/databasePrisma";
-
+export const dynamic = "force-dynamic"; 
 async function validateQueryParams(req: NextRequest) {
   const url = req.nextUrl;
   const allowedParams = ["page", "limit", "sort", "fields", "search", "tags"]; // Include 'search' and 'tags'

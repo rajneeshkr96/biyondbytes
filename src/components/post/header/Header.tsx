@@ -32,7 +32,7 @@ const Header: FC<HeaderProps> = ({title, createdAt, readTime,image,tags,author }
                 className="w-12 h-12 border rounded-full border-white"
             ></Image> <span className='text-center text-sm'> <p className='font-bold'>{author.name}</p><p>{readTime}</p> </span></div>
             <ul className='text-center text-sm flex justify-center flex-wrap gap-2 items-center my-4'>
-                {tags.map((tag:string,index:number) => <li key={index} className='px-2 border-1 border-main-text-color bg-white bg-opacity-60 backdrop-blur-sm text-main-text-color  rounded-3xl'>{tag}</li>)}
+                {tags?.map((tag:string,index:number) => <li key={index} className='px-2 border-1 border-main-text-color bg-white bg-opacity-60 backdrop-blur-sm text-main-text-color  rounded-3xl'>{tag}</li>)}
             </ul>
             
             <figure className='w-[65%] max-md:!w-full my-6'>

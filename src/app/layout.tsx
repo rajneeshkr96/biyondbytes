@@ -10,8 +10,8 @@ import ReduxProvider from "@/redux/Provider";
 import { auth } from "@/backend/auth/auth";
 import { SessionProvider } from "next-auth/react"
 import Navbar from "@/components/layoutComponents/Navbar";
-import Script from "next/script";
 const inter = Inter({ subsets: ["latin"] });
+export const dynamic = "force-dynamic";
 
 export const source_serif_4 = Source_Serif_4({
   subsets: ['latin'],

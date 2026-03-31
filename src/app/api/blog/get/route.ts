@@ -1,6 +1,7 @@
 import { NextResponse,NextRequest } from "next/server";
 import { dataBasePrisma } from "@/databasePrisma";
 
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {

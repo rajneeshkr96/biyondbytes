@@ -26,7 +26,7 @@ const AddTags = () => {
   return (
     <>
     <div >
-        {tags.map(({ id,title, value }: {
+        {tags?.map(({ id,title, value }: {
             id:string
           title: string;
           value: string[];

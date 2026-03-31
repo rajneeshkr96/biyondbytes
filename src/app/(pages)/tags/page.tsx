@@ -16,7 +16,7 @@ const page = async () => {
     <div>
       <h1 className='mx-auto block font-bold text-3xl my-4'>Explore Tags</h1>
       <div className='flex justify-start items-center flex-wrap'>
-        {tags.map(({ title, value }: {
+        {tags?.map(({ title, value }: {
           title: string;
           value: string[];
         }) => <TagCard key={title} title={title} value={value} />)}
