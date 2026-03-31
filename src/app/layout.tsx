@@ -18,7 +18,7 @@ export const source_serif_4 = Source_Serif_4({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.BASE_URL || ""),
+  metadataBase: new URL(process.env.BASE_URL || "https://biyondbytes.com"),
   title: {
     default: "Biyond Bytes",
     template: `%s | Biyond Bytes`,
@@ -34,7 +34,13 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
+  let session = null;
+
+try {
+  session = await auth();
+} catch (err) {
+  console.log("Auth failed during build:", err);
+}
 
   return (
     <html lang="en">
