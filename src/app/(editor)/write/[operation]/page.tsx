@@ -173,13 +173,12 @@ const Page = () => {
           setPreImage({ src: res.data.data.image.src, alt: res.data.data.image.alt })
           const c = JSON.parse(res.data.data.content)
           setContent(c)
-          editor?.commands.setContent(c)
         }
         setFullLoading(false)
       }
       getPostData()
     }
-  }, [param.operation, searchParams, router, session.data?.user.role, editor?.commands])
+  }, [param.operation, searchParams, router, session.data?.user.role])
 
   /* ─── autosave every 5 s ─── */
   useEffect(() => {
