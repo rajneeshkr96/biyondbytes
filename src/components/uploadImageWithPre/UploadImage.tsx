@@ -1,7 +1,7 @@
 import React from 'react'
 import { TiImage } from "react-icons/ti";
 import Image from 'next/image'
-import { PreImageProps } from '@/app/(pages)/write/[operation]/page';
+import { PreImageProps } from '@/app/(editor)/write/[operation]/page';
 const UploadImage = ({preImage,...props}:{preImage:PreImageProps}) => {
   return (
     <div className=" w-full mx-auto sm:max-w-7xl my-2">

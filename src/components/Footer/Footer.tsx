@@ -1,170 +1,163 @@
 "use client";
-import React from "react";
-import Image from "next/image";
-import SubmitButton from "../layoutComponents/Button/SubmitButton";
-import {
-  companyProducts,
-  companyDetails,
-  companyResources,
-  companySocials,
-  companyUpCases,
-  companyLegal,
-} from "./data";
+import React, { useState } from "react";
 import Link from "next/link";
-interface FooterProps {
-  data: {
-    title: string;
-    img: string;
-    alt: string;
-    description: string;
-    slug: string;
-  }[];
-}
+import { FaXTwitter, FaInstagram, FaLinkedinIn, FaYoutube, FaGithub } from "react-icons/fa6";
+import { ArrowRight, Mail, Rss } from "lucide-react";
+import { toast } from "react-toastify";
 
-const Footer: React.FC<FooterProps> = ({ data }) => {
-  const sendONPage = () => {
-    // console.log("send to page");
+const navColumns = [
+  {
+    heading: "Explore",
+    links: [
+      { label: "All Articles", href: "/blog" },
+      { label: "Tags & Topics", href: "/tags" },
+      { label: "About Us", href: "/about-us" },
+      { label: "Careers", href: "/career-page" },
+    ],
+  },
+  {
+    heading: "Write",
+    links: [
+      { label: "Start Writing", href: "/write/new" },
+      { label: "Writer Guidelines", href: "/about-us" },
+      { label: "Contact Us", href: "/contact-us" },
+    ],
+  },
+  {
+    heading: "Legal",
+    links: [
+      { label: "Privacy Policy", href: "/privacy-policy" },
+      { label: "Terms of Service", href: "/terms-services" },
+      { label: "Disclaimer", href: "/disclaimer-page" },
+    ],
+  },
+];
+
+const socials = [
+  { icon: FaXTwitter, href: "https://x.com/BiyondBytes", label: "X / Twitter" },
+  { icon: FaInstagram, href: "https://www.instagram.com/biyondbytes/", label: "Instagram" },
+  { icon: FaLinkedinIn, href: "https://www.linkedin.com/company/biyondbytes", label: "LinkedIn" },
+  { icon: FaYoutube, href: "https://www.youtube.com/@biyondbytes", label: "YouTube" },
+  { icon: FaGithub, href: "https://github.com/BiyondBytes", label: "GitHub" },
+];
+
+const Footer: React.FC = () => {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    setLoading(true);
+    setTimeout(() => {
+      toast.success("You're subscribed! Welcome to BiyondBytes.");
+      setEmail("");
+      setLoading(false);
+    }, 800);
   };
-  return (
-    <div className="container !h-min !bg-main-text-color mt-6 dark:!bg-dark-color text-white max-w-[100vw] max-md:pb-16">
-      <div className="px-4 py-8">
-        <section className=" grid grid-cols-3  max-sm:grid-cols-1 ">
-          <div className="flex w--[1/3] flex-col gap-4 max-md:hidden ">
-            <p>Latest</p>
-            <h2 className="capitalize text-2xl max-sm:text-lg font-bold max-sm:font-semibold">
-              from the blog
-            </h2>
-            <p> The latest industry news,interviews and resources</p>
-            <SubmitButton
-              mainClass=" w-36 border-2 px-1 mt-3 py-2 rounded-md text-lg"
-            >View all posts</SubmitButton>
-          </div>
-          <div className=" flex col-span-2 max-md:hidden">
-            {data.map((item, index) => (
-              <div
-                key={index}
-                className="flex flex-col items-center text-start cursor-pointer gap-2 w-1/2"
-              >
-                <Image
-                  src={item.img}
-                  alt={item.alt}
-                  width={200}
-                  height={100}
-                  className="w-11/12 h-[60%]"
-                />
-                <div className="text-start w-full px-5">
-                  <h3
-                    onClick={sendONPage}
-                    className="text-lg  hover:underline font-semibold"
-                  >
-                    {item.title}
-                  </h3>
-                  <p>{item.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-        <div className="flex max-md:flex-col justify-between w-full">
-          <div className="gap-y-2 flex flex-col">
-            <h2 className="text-2xl font-bold max-sm:font-medium max-sm:text-xl">
-              Join our newsletter
-            </h2>
-            <p>we&apos;ll send you a nice letter once per week. No spam. </p>
-          </div>
-          <div className="my-5 lg:w-1/3 mr-6">
-            <div className="relative flex h-16 w-full max-md:flex-col max-md:gap-y-4 ">
-              <input
-                placeholder="Enter your email address"
-                className="peer !h-full max-md:h-12 mr-4 w-full border-b border-blue-gray-200  bg-transparent pt-4 max-md:pb-3 max-md:placeholder:text-base pb-1.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-white focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50 placeholder:text-white focus:placeholder:opacity-100"
-              />
 
-              <SubmitButton
-                mainClass=" lg:w-32 max-md:w-full border-2 px-1 lg:mt-6 py-1 max-sm:mt-0 font-light rounded-sm lg:h-11  text-lg"
-              >Subscribe</SubmitButton>
+  return (
+    <footer className="bg-gray-50 text-[rgb(9,9,11)] relative overflow-hidden border-t border-gray-100">
+      {/* Top decorative gradient */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] bg-[#462C7D]/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="bb-container relative z-10">
+        {/* Newsletter section */}
+        <div className="py-16 md:py-20 border-b border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Rss className="w-4 h-4 text-[#462C7D]" />
+                <span className="text-xs font-bold tracking-[0.2em] uppercase text-[#462C7D]">Newsletter</span>
+              </div>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-[rgb(9,9,11)] leading-tight mb-3">
+                Stay in the loop.
+              </h2>
+              <p className="text-gray-500 text-base leading-relaxed">
+                Get the best stories, insights, and ideas delivered to your inbox every week. No spam, ever.
+              </p>
+            </div>
+            <form onSubmit={handleSubscribe} className="flex gap-3 max-w-md md:ml-auto">
+              <div className="flex-1 relative">
+                <Mail className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="w-full bg-white border border-gray-200 text-[rgb(9,9,11)] text-sm pl-11 pr-4 py-3.5 rounded-xl focus:outline-none focus:border-[#462C7D] transition-all placeholder:text-gray-400"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="shrink-0 bg-[rgb(9,9,11)] hover:bg-gray-800 text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all duration-200 disabled:opacity-60 flex items-center gap-2"
+              >
+                {loading ? "..." : <><span>Subscribe</span><ArrowRight className="w-3.5 h-3.5" /></>}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Main footer content */}
+        <div className="py-14 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10">
+          {/* Brand column */}
+          <div className="col-span-2">
+            <Link href="/" className="font-serif text-2xl font-bold tracking-tight text-[rgb(9,9,11)] inline-block mb-4">
+              Biyond<span className="text-[#462C7D]">Bytes</span>
+            </Link>
+            <p className="text-gray-500 text-sm leading-relaxed max-w-xs mb-8">
+              Stories, ideas, and perspectives from writers who think deeply about technology, design, and culture.
+            </p>
+            <div className="flex items-center gap-2.5">
+              {socials.map(({ icon: Icon, href, label }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={label}
+                  className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[#462C7D] hover:border-[#462C7D] hover:bg-[#462C7D]/10 transition-all duration-200"
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                </Link>
+              ))}
             </div>
           </div>
+
+          {/* Nav columns */}
+          {navColumns.map((col) => (
+            <div key={col.heading}>
+              <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-5">
+                {col.heading}
+              </p>
+              <ul className="flex flex-col gap-3">
+                {col.links.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-gray-500 hover:text-[rgb(9,9,11)] transition-colors duration-200 font-medium"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        <div className="mt-6 grid grid-cols-6 max-md:grid-cols-3 max-md:mt-8 max-md:gap-y-6 max-sm:grid-cols-2 justify-between  ">
-          <div className="flex flex-col gap-y-2 ">
-            {companyProducts.map((product, index) => (
-              <div key={index} className="flex gap-6 justify-between">
-                <Link
-                  href={product.link}
-                  className=" hover:underline  max-md:font-light    "
-                >
-                  {product.title}
-                </Link>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-col gap-y-2 ">
-            {companyDetails.map((product, index) => (
-              <div key={index} className="flex gap-6 justify-between">
-                <Link
-                  href={product.link}
-                  className=" hover:underline  max-md:font-light   "
-                >
-                  {product.title}
-                </Link>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-col gap-y-2 ">
-            {companyResources.map((product, index) => (
-              <div key={index} className="flex gap-6 justify-between">
-                <Link
-                  href={product.link}
-                  className=" hover:underline  max-md:font-light   "
-                >
-                  {product.title}
-                </Link>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-col gap-y-2 ">
-            {companySocials.map((product, index) => (
-              <div key={index} className="flex gap-6 justify-between">
-                <Link
-                  href={product.link}
-                  className=" hover:underline  max-md:font-light   "
-                >
-                  {product.title}
-                </Link>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-col gap-y-2 ">
-            {companyUpCases.map((product, index) => (
-              <div key={index} className="flex gap-6 justify-between">
-                <Link
-                  href={product.link}
-                  className=" hover:underline  max-md:font-light  "
-                >
-                  {product.title}
-                </Link>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-col gap-y-2  ">
-            {companyLegal.map((product, index) => (
-              <div key={index} className="flex gap-6 justify-between">
-                <Link
-                  href={product.link}
-                  className=" hover:underline  max-md:font-light   "
-                >
-                  {product.title}
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="flex max-md:flex-col max-md:gap-y-5 justify-between mt-8 ">
-          <Link href={"/"} className=" list-disc font-bold text-base" >BiyondBytes</Link >
-          <p className="mr-4">&#169; 2024 BiyondBytes. All rights reserved.</p>
+
+        {/* Bottom bar */}
+        <div className="border-t border-gray-200 py-7 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-gray-400 font-medium">
+            © {new Date().getFullYear()} BiyondBytes · All rights reserved
+          </p>
+          <p className="text-xs text-gray-400">
+            Made with ♥ for curious minds
+          </p>
         </div>
       </div>
-    </div>
+    </footer>
   );
 };
 

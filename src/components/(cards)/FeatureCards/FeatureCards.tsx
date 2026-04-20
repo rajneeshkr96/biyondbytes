@@ -1,63 +1,55 @@
-import React, { FC } from 'react'
-import { CardsProps } from '../MainCard/MainCard'
-import Image from 'next/image'
-import Link from 'next/link'
-import { CiCalendar } from "react-icons/ci";
-import { FaBlog } from "react-icons/fa";
-import { MdKeyboardArrowRight } from "react-icons/md";
-import localFont from 'next/font/local'
+import React, { FC } from 'react';
+import { CardsProps } from '../MainCard/MainCard';
+import Image from 'next/image';
+import Link from 'next/link';
 
-export const monaRegular = localFont({
-  src: './HubotSans-Regular.otf',
-  display: 'swap',
-})
-interface FeatureCardProps extends CardsProps{
-  category?: string
+interface FeatureCardProps extends CardsProps {
+  category?: string;
+  className?: string;
 }
+
 const FeatureCards: FC<FeatureCardProps> = ({
-  id,
-  image,
-  title,
-  slug,
-  author,
-  createdAt,
-  category,
-  ...props
-}
+  image, title, slug, author, createdAt,
+  category = "Editorial", className = "", ...props
+}) => {
+  const date = new Date(createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-) => {
   return (
-    <div {...props} className='w-[80vw] h-full !min-w-96 flex justify-center gap-x-8 mx-auto my-4 capitalize flex-wrap max-md:flex-col cursor-pointer'>
-      <div className='w-[45%] max-h-64 max-md:w-[90%]'>
-        <Image src={image.src} alt={image.alt} width={2000} height={2000} className='rounded-xl w-full h-full object-cover' />
-      </div>
-      <div className='w-[45%] px-2 max-md:w-[90%] py-4'>
-      <span className='flex justify-start items-center gap-4 ' >
-            <FaBlog /> {category}
-          </span>
-        <h2 className={`${monaRegular.className} font-semibold line-clamp-2 text-2xl ca`}>
+    <article
+      {...props}
+      className={`group relative flex flex-col w-[300px] shrink-0 bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-500 ${className}`}
+    >
+      {/* Image */}
+      <Link href={`/post/${slug}`} className="block relative aspect-[16/10] overflow-hidden bg-gray-100">
+        <Image
+          src={image.src}
+          alt={image.alt || title}
+          fill
+          className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-[1.06]"
+        />
+        {/* Category badge */}
+        <span className="absolute top-3 left-3 text-[10px] font-bold tracking-widest uppercase bg-white/90 backdrop-blur-sm text-gray-700 px-2.5 py-1 rounded-full border border-white/60">
+          {category}
+        </span>
+      </Link>
+
+      {/* Content */}
+      <div className="flex flex-col gap-3 p-5">
+        <h3 className="font-serif text-[1rem] font-bold text-gray-900 leading-[1.45] line-clamp-2 group-hover:text-bb-accent transition-colors duration-300">
           <Link href={`/post/${slug}`}>{title}</Link>
-        </h2>
-        <div className='text-[#6a6a6a] text-sm capitalize flex gap-x-2 px-2 py-3' >
-          <span className='flex justify-center items-center gap-1 ' ><Image
-            src={author.image}
-            alt={author.name}
-            width={20}
-            height={20}
-            className="w-4 h-4 rounded-full"
-          ></Image> {author.name}</span>
-          <span className='flex justify-center items-center gap-1'><CiCalendar />
-            {new Date(createdAt).toLocaleDateString()}
-          </span>
+        </h3>
+
+        {/* Author + date */}
+        <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+          <div className="relative w-6 h-6 rounded-full overflow-hidden ring-2 ring-gray-100 shrink-0">
+            <Image src={author.image} alt={author.name} fill className="object-cover" />
+          </div>
+          <span className="text-[11px] font-semibold text-gray-500 flex-1 truncate">{author.name}</span>
+          <span className="text-[11px] text-gray-400 shrink-0">{date}</span>
         </div>
-          <Link href={`/post/${slug}`} className='flex justify-start items-center gap-1 text-[#0f7391] mx-4 font-medium'>
-            Read Full article <MdKeyboardArrowRight />
-          </Link>
-
       </div>
+    </article>
+  );
+};
 
-    </div>
-  )
-}
-
-export default FeatureCards
+export default FeatureCards;

@@ -1,12 +1,8 @@
-
 import Image from "next/image";
-import { BsReply } from "react-icons/bs";
-import { BiLike } from "react-icons/bi";
 import DropDown from "@/components/layoutComponents/Button/Dropdown";
-import { MdDeleteOutline, MdReportProblem } from "react-icons/md";
-import { CiEdit } from "react-icons/ci";
 import Link from "next/link";
 import axios from "axios";
+import { CornerDownRight, ThumbsUp, Edit, Trash2, AlertTriangle } from "lucide-react";
 
 interface CommentCardProps {
     comment: {
@@ -43,11 +39,11 @@ interface CommentCardProps {
           success = true;
           return null;
         } catch (error) {
-          // console.log(error);
           success = false;
           return null;
         }
       };
+      
       const replyTocomment = (commentsId: string) => {
         setReplyId(commentsId);
         setIsReply(true);
@@ -56,106 +52,101 @@ interface CommentCardProps {
         }
         return isReply;
       };
+      
     const commentsElements = [
         {
           name: "Like",
-          icon: <BiLike />,
+          icon: <ThumbsUp className="w-3.5 h-3.5" />,
           apiFunction: addRemoveLike,
         },
         {
           name: "Reply",
-          icon: <BsReply />,
+          icon: <CornerDownRight className="w-3.5 h-3.5" />,
           apiFunction: replyTocomment,
         },
-        
       ];
+      
       const dropdownElements = [
         {
           name: "Edit",
-          icon: <CiEdit className="w-6 max-sm:w-4 h-6 max-sm:h-4 " />,
-          className: "text-black",
+          icon: <Edit className="w-4 h-4" />,
+          className: "text-white hover:text-bb-accent",
         },
         {
           name: "Delete",
-          icon: <MdDeleteOutline className="w-6 max-sm:w-4 h-6 max-sm:h-4" />,
-          className: "text-black",
+          icon: <Trash2 className="w-4 h-4" />,
+          className: "text-red-400 hover:text-red-300",
         },
         {
           name: "Report",
-          icon: <MdReportProblem className="w-6 max-sm:w-4 h-6 max-sm:h-4" />,
-          className: "text-red-500 ",
+          icon: <AlertTriangle className="w-4 h-4" />,
+          className: "text-yellow-500 hover:text-yellow-400",
         },
       ];
-
     
   return (
     <>
-        <article className=" text-base bg-white rounded-lg dark:bg-gray-900 px-2 mt-3 border ">
-        <footer className="flex justify-between items-start !relative  !px-0 !py-3 mt-5">
-          <div className=" items-center">
-            <div className="flex w-full ">
-              <Image
-                width={24}
-                height={24}
-                className="mr-2 w-6 h-6 relative max-sm:top-2.5 md:top-1 rounded-full"
-                src={
-                  comment.UserImage
-                    ? comment.UserImage
-                    : "https://lh3.googleusercontent.com/a/ACg8ocKGKHmisSQpCqk2ykJStKwGDGu95aV_zi976oOn06DbmV8=s96-c"
-                }
-                alt={comment.UserName}
-              />
-              <div>
-
-              <p className="inline-flex items-center !capitalize mr-2 max-sm:w-36 text-sm text-gray-900 dark:text-white font-semibold">
-                {comment.name}
-              </p>
-              <span>to</span> <Link className="font-light text-sm" href={`#`}>@{comment.ReplyUserName}</Link>
+      <article className="text-base bg-bb-surface/50 rounded-xl px-5 py-4 mt-3 border border-white/5">
+        <footer className="flex justify-between items-start mb-3">
+          <div className="flex items-center">
+            <Image
+              width={24}
+              height={24}
+              className="mr-3 w-6 h-6 rounded-full border border-white/10"
+              src={
+                comment.UserImage
+                  ? comment.UserImage
+                  : "https://lh3.googleusercontent.com/a/ACg8ocKGKHmisSQpCqk2ykJStKwGDGu95aV_zi976oOn06DbmV8=s96-c"
+              }
+              alt={comment.UserName}
+            />
+            <div>
+              <div className="flex flex-wrap items-center text-sm">
+                <span className="font-semibold text-white capitalize mr-2">
+                  {comment.name}
+                </span>
+                <span className="text-bb-muted text-xs mr-2">reply to</span>
+                <Link className="font-medium text-bb-accent hover:underline text-xs" href={`#`}>
+                  @{comment.ReplyUserName}
+                </Link>
               </div>
+              <p className="text-xs text-bb-muted">
+                <time dateTime={comment.createdAt}>
+                  {comment.createdAt.split("T")[0]}
+                </time>
+              </p>
             </div>
-            
-            <p className="text-sm text-gray-600 md:ml-8 max-sm:ml-8   dark:text-gray-400">
-              <time dateTime="2022-02-08" title="February 8th, 2022">
-                {comment.createdAt.split("T")[0]}
-              </time>
-            </p>
           </div>
           <DropDown
-            className="text-black"
+            className="text-white"
             content={dropdownElements}
           ></DropDown>
         </footer>
-        <p className="text-gray-500 text-start dark:text-gray-400">
+        
+        <p className="text-white/80 text-sm leading-relaxed mb-4">
           {comment.comment}
         </p>
-        <div className="flex items-center mt-4 space-x-3">
+        
+        <div className="flex items-center space-x-4">
           {commentsElements.map((item, index) => (
             <div
               key={index}
-              className="cursor-pointer flex items-center text-center  pb-2 text-black  "
+              className="cursor-pointer flex items-center gap-1.5 text-xs text-bb-muted hover:text-bb-accent transition-colors"
+              onClick={async (event) => {
+                event.preventDefault();
+                try {
+                  await item.apiFunction(comment.id);
+                } catch (error) {}
+              }}
             >
-              <Link className="text-xs  mr-1.5" href={`#`}>
+              {item.icon}
+              <span>
                 {item.name === "Like" ? comment?.likesCount : ""} {item.name}
-              </Link>
-              <span
-                onClick={async (event) => {
-                  event.preventDefault();
-                  try {
-                    await item.apiFunction(comment.id);
-                  } catch (error) {
-                    // console.error(error);
-                  }
-                }}
-              >
-                {item.icon}
               </span>
             </div>
           ))}
-          
         </div>
-        {/* make view all replies */}
       </article>
-
     </>
   )
 }

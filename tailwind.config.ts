@@ -10,13 +10,28 @@ export default withUt({
   darkMode: 'class',
   theme: {
     fontFamily: {
-      display: ['Open Sans', 'sans-serif'],
-      body: ['Open Sans', 'sans-serif'],
-      serif: ['var(--source_serif_4)'],
+      sans: ['Inter', 'sans-serif'],
+      serif: ['"Playfair Display"', 'serif'],
+      display: ['"Playfair Display"', 'serif'],
+      body: ['Inter', 'sans-serif'],
     },
     extend: {
       fontSize: {
         14: '14px',
+      },
+      colors: {
+        "bb-ink": "#FAFAFA",
+        "bb-surface": "#FFFFFF",
+        "bb-surface-2": "#F5F5F5",
+        "bb-muted": "#6B7280",
+        "bb-accent": "#7c3aed",
+        "bb-accent-2": "#ec4899",
+        "bb-dark": "#060608",
+        "bb-text": "#0A0A0A",
+        "bb-border": "#E5E7EB",
+        "light-color": '#F5F7F8',
+        "main-text-color": '#495E57',
+        "dark-color":"#45474B",
       },
       backgroundColor: {
         'main-bg': '#FCF8F3',
@@ -25,16 +40,11 @@ export default withUt({
         'main-sec-color': '#F4CE14',
         'hover-bg': '#52665A',
       },
-      colors:{
-        "light-color": '#F5F7F8',
-        "main-text-color": '#495E57',
-        "dark-color":"#45474B",
-      },
       borderWidth: {
         1: '1px',
       },
       borderColor: {
-        color: 'rgba(0, 0, 0, 0.1)',
+        color: 'rgba(255, 255, 255, 0.1)',
       },
       width: {
         400: '400px',
@@ -51,13 +61,9 @@ export default withUt({
       minHeight: {
         590: '590px',
       },
-      backgroundImage: {
-        'hero-pattern':
-          "url('https://i.ibb.co/MkvLDfb/Rectangle-4389.png')",
-      },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 });
-
-

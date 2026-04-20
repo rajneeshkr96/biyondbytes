@@ -1,37 +1,37 @@
-"use client"
-import SubmitButton from '@/components/layoutComponents/Button/SubmitButton'
-import CustomInputBox from '@/components/layoutComponents/InputBox'
-import Link from 'next/link'
-import React from 'react'
+"use client";
+import Link from "next/link";
+import React from "react";
+import CustomInputBox from "@/components/layoutComponents/InputBox";
 import { IoLogIn } from "react-icons/io5";
-const page = () => {
 
+const page = () => {
   return (
-    <div className=' text-dark-color mx-auto my-auto max-md:w-full w-10/12 flex flex-col justify-center items-center'>
-      <h3 className='text-3xl font-bold mx-auto w-full max-md:text-center'>
-        Register
-      </h3>
-      <p className='text-gray-600 text-center px-4 w-10/12  text-sm'>Share Your Voice, Connect with the World – Blog with Us!</p>
-      <form className='flex flex-col gap-y-2 my-6'>
-        <CustomInputBox placeholder='Enter your Name' label='Name*' />
-        <CustomInputBox placeholder='Enter your Email' label='Email*' />
-        <CustomInputBox placeholder='Enter password' type='password' label='Password*' />
-        <p className='text-sm'>Must be at least 8 characters</p>
-        <SubmitButton className='w-full '>
-          <>
-          <IoLogIn className='text-sm' />Get Started
-          </>
-        </SubmitButton >
-      </form>
-      <div className='flex justify-center gap-x-2 '>
-        <span>already have an account</span>
-        <Link href='/byAuthBtn' className='text-main-text-color font-bold'>
-          Sign in
-        </Link>
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="font-serif text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-[rgb(9,9,11)] mb-2 tracking-tight">
+          Create account
+        </h1>
+        <p className="text-sm text-gray-500">Share your voice with the world</p>
       </div>
 
-    </div>
-  )
-}
+      <form className="flex flex-col gap-4">
+        <CustomInputBox placeholder="Enter your name" label="Name" />
+        <CustomInputBox placeholder="Enter your email" label="Email" />
+        <CustomInputBox placeholder="Enter password" type="password" label="Password" />
+        <p className="text-xs text-gray-400 -mt-2">Must be at least 8 characters</p>
 
-export default page
+        <button type="submit"
+          className="flex items-center justify-center gap-2 w-full px-5 py-3.5 bg-[rgb(9,9,11)] text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-all mt-1">
+          <IoLogIn className="text-base" /> Get Started
+        </button>
+      </form>
+
+      <p className="text-center text-sm text-gray-500">
+        Already have an account?{" "}
+        <Link href="/byAuthBtn" className="text-[rgb(9,9,11)] font-semibold hover:underline">Sign in</Link>
+      </p>
+    </div>
+  );
+};
+
+export default page;

@@ -1,8 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['unsplash.com','images.unsplash.com',"firebasestorage.googleapis.com",'utfs.io','lh3.googleusercontent.com','avatars.githubusercontent.com',"www.biyondbytes.com","dev-to-uploads.s3.amazonaws.com"],
-      },
+        remotePatterns: [
+            { protocol: 'https', hostname: 'unsplash.com' },
+            { protocol: 'https', hostname: 'images.unsplash.com' },
+            { protocol: 'https', hostname: 'firebasestorage.googleapis.com' },
+            { protocol: 'https', hostname: 'utfs.io' },
+            { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+            { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
+            { protocol: 'https', hostname: 'www.biyondbytes.com' },
+            { protocol: 'https', hostname: 'dev-to-uploads.s3.amazonaws.com' },
+        ],
+    },
     swcMinify: true,
     env: {
     BASE_URL: process.env.BASE_URL,

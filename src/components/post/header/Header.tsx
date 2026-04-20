@@ -1,46 +1,73 @@
-
 import { formatDate } from '@/tools/FormatDate';
-import Image from 'next/image'
-import React, { FC } from 'react'
-
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { FC } from 'react';
+import { Clock, ChevronLeft } from 'lucide-react';
 
 interface HeaderProps {
-    title: string,
-    createdAt: Date,
-    readTime: string,
-    tags:string[],
-    image: { src: string, alt: string, caption?: string },
-    author:{ id: string; name: string, image: string, role: string },
+    title: string;
+    createdAt: Date;
+    readTime: string;
+    tags: string[];
+    image: { src: string; alt: string; caption?: string };
+    author: { id: string; name: string; image: string; role: string };
 }
-const Header: FC<HeaderProps> = ({title, createdAt, readTime,image,tags,author }) => {
 
+const Header: FC<HeaderProps> = ({ title, createdAt, readTime, image, author }) => {
     return (
-        <header className='text-gray-700 w-full flex flex-col justify-center items-center pt-4 font-serif'>
-            <div className='text-sm text-center py-2 flex flex-col gap-y-2'>
-                <h1 className='text-5xl max-md:text-2xl text-dark-color font-bold line-clamp-3 px-12 max-md:px-0'>{title}</h1>
-                <div >
-                    <time dateTime={createdAt.toString()}>Published {formatDate(createdAt)}</time> 
-                </div>    
+        <header className="w-full bg-[#FAFAFA] pt-20">
+            <div className="max-w-[860px] mx-auto px-4 md:px-6">
 
+                {/* Top bar: Back to Blog + Date */}
+                <div className="flex items-center justify-between mb-8">
+                    <Link href="/blog" className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-700 transition-colors">
+                        <ChevronLeft className="w-4 h-4" />
+                        Back to Blog
+                    </Link>
+                    <time className="text-sm text-gray-400">
+                        {new Date(createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </time>
+                </div>
+
+                {/* Title */}
+                <h1 className="font-serif text-[clamp(2rem,5vw,3.2rem)] font-bold text-[rgb(9,9,11)] leading-[1.1] tracking-tight mb-8">
+                    {title}
+                </h1>
+
+                {/* Author row */}
+                <div className="flex items-center justify-between mb-10">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full overflow-hidden relative shrink-0 bg-gray-200">
+                            <Image src={author.image} alt={author.name} fill className="object-cover" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold text-[rgb(9,9,11)] leading-tight">{author.name}</p>
+                            <p className="text-xs text-gray-400">{author.role || 'Author'}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-sm text-gray-400">
+                        <Clock className="w-4 h-4" />
+                        <span>{readTime}</span>
+                    </div>
+                </div>
+
+                {/* Hero image */}
+                <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-gray-100">
+                    <Image
+                        src={image.src}
+                        alt={image.alt || title}
+                        fill
+                        priority
+                        className="object-cover"
+                    />
+                </div>
+
+                {image?.caption && (
+                    <p className="text-[11px] text-gray-400 mt-2 text-right">{image.caption}</p>
+                )}
             </div>
-            <div className='flex items-center px-12 justify-center gap-2 max-w-[799px] mx-auto ' >
-                <Image
-                src={author.image}
-                alt={author.name}
-                width={20}
-                height={20}
-                className="w-12 h-12 border rounded-full border-white"
-            ></Image> <span className='text-center text-sm'> <p className='font-bold'>{author.name}</p><p>{readTime}</p> </span></div>
-            <ul className='text-center text-sm flex justify-center flex-wrap gap-2 items-center my-4'>
-                {tags?.map((tag:string,index:number) => <li key={index} className='px-2 border-1 border-main-text-color bg-white bg-opacity-60 backdrop-blur-sm text-main-text-color  rounded-3xl'>{tag}</li>)}
-            </ul>
-            
-            <figure className='w-[65%] max-md:!w-full my-6'>
-                <Image src={image.src} alt={image.alt} width={300} height={200} className='w-full h-full object-cover max-md:!rounded-md rounded-3xl' />
-                {image?.caption && <figcaption className='mx-auto inline-block'>{image.caption}</figcaption>}
-            </figure>
         </header>
-    )
-}
+    );
+};
 
-export default Header
+export default Header;

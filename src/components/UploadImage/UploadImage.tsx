@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Modal from '../Modals/Modal';
 import { UploadButton } from '@/utilis';
-import { PreImageProps } from '@/app/(pages)/write/[operation]/page';
+import { PreImageProps } from '@/app/(editor)/write/[operation]/page';
 import { toast } from 'react-toastify';
 import { DebouncedState } from 'use-debounce';
 

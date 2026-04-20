@@ -1,55 +1,49 @@
-import SubmitButton from '@/components/layoutComponents/Button/SubmitButton';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { FC } from 'react'
-import { FaFacebook } from "react-icons/fa";
-import { FaLinkedin } from "react-icons/fa";
-import { FaSquareXTwitter } from "react-icons/fa6";
+import React, { FC } from 'react';
+import { FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa';
+import SubmitButton from '@/components/layoutComponents/Button/SubmitButton';
+
 interface AuthorProps {
-    author:{ id: string; name: string, image: string, role: string },
-    isFollow?: boolean,
-    url?:string
-}
-const Author: FC<AuthorProps> = ({author, isFollow = true,url}) => {
-    return (
-            <div className='flex items-center px-12 gap-x-12 justify-between max-md:justify-center flex-wrap max-md:gap-2 max-w-[799px] mx-auto max-md:gap-y-2 my-12' >
-                <div className='flex justify-center items-center gap-1 text-sm '>
-                    <Image
-                    src={author.image}
-                    alt={author.name}
-                    width={20}
-                    height={20}
-                    className="w-10 h-10 border rounded-full "
-                ></Image> 
-                <div>
-                    <p className='font-bold'>{author.name}</p>
-                    <p >Creative, Elegant and Visionary</p>
-                </div>
-                </div>
-                <div className='flex justify-center items-center gap-2 text-gray-400 '>
-                    <SubmitButton mainClass='border-1 px-2 py-1 border-gray-400 text-main-text-color rounded-lg font-bold'  >{isFollow?"follow":"unfollow"}</SubmitButton>
-                    <Link 
-                        href={`https://www.facebook.com/share.php?u='+${process.env.BASEURL}${url}+'&title=Title`}
-                        className='border-1 px-2 py-1 border-gray-400 rounded-lg text-2xl'
-                    >
-                        <FaFacebook  />
-                    </Link>
-                    <Link 
-                        href={`https://twitter.com/intent/tweet?url='+ ${process.env.BASEURL}${url} +'&hashtags=`}
-                        className='border-1 px-2 py-1 border-gray-400 rounded-lg text-2xl'
-                    >
-                        <FaSquareXTwitter />
-                    </Link>
-                    <Link 
-                        href={`https://www.linkedin.com/shareArticle?mini=true&url='+${process.env.BASEURL}${url}+'&title=Title&source=`}
-                        className='border-1 px-2 py-1 border-gray-400 rounded-lg text-2xl'
-                    >
-                        <FaLinkedin />
-                    </Link>
-                    
-                </div>
-            </div>
-    )
+    author: { id: string; name: string; image: string; role: string };
+    isFollow?: boolean;
+    url?: string;
 }
 
-export default Author
+const Author: FC<AuthorProps> = ({ author, isFollow = true, url = '' }) => {
+    return (
+        <div className="flex items-center justify-between flex-wrap gap-6 py-8 my-10 border-y border-gray-100">
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full overflow-hidden relative shrink-0 bg-gray-100">
+                    <Image src={author.image} alt={author.name} fill className="object-cover" />
+                </div>
+                <div>
+                    <p className="font-bold text-[rgb(9,9,11)] text-base">{author.name}</p>
+                    <p className="text-sm text-gray-400">{author.role || 'Author'}</p>
+                </div>
+            </div>
+            <div className="flex items-center gap-3">
+                <SubmitButton mainClass="px-5 py-2 border border-gray-200 text-gray-600 hover:bg-gray-100 rounded-full font-medium transition-colors text-sm">
+                    {isFollow ? 'Follow' : 'Unfollow'}
+                </SubmitButton>
+                <Link href={`https://www.facebook.com/share.php?u=${encodeURIComponent(process.env.BASEURL + url)}`}
+                    className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-400 transition-all"
+                    target="_blank" rel="noreferrer">
+                    <FaFacebook className="w-4 h-4" />
+                </Link>
+                <Link href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(process.env.BASEURL + url)}`}
+                    className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-400 transition-all"
+                    target="_blank" rel="noreferrer">
+                    <FaTwitter className="w-4 h-4" />
+                </Link>
+                <Link href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(process.env.BASEURL + url)}`}
+                    className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-400 transition-all"
+                    target="_blank" rel="noreferrer">
+                    <FaLinkedin className="w-4 h-4" />
+                </Link>
+            </div>
+        </div>
+    );
+};
+
+export default Author;

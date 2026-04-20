@@ -1,9 +1,11 @@
+import Navbar from "@/components/layoutComponents/Navbar";
+import React from "react";
 
-export default function HomeLayout({ children,params }: { children: React.ReactNode, params:{slug:string,schema:object}}) {
-
-    return (
-        <>
-            {children}
-        </>
-    );
+export default function PostLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Navbar />
+      {children}
+    </>
+  );
 }

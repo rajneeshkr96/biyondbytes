@@ -18,7 +18,7 @@ import {
   import { RiInsertColumnRight,RiDeleteColumn,RiDeleteRow,RiInsertRowBottom } from "react-icons/ri";
   import { FcDeleteDatabase } from "react-icons/fc";
 import ImageUploadModal from './UploadImage/UploadImage';
-import { PreImageProps } from '@/app/(pages)/write/[operation]/page';
+import { PreImageProps } from '@/app/(editor)/write/[operation]/page';
 
 
   // types 
@@ -78,10 +78,10 @@ const TextEditor:FC<EditorProps> = ({editor}) => {
       }
 
        
-      const iconClass:string =  "text-white hover:text-gray-200"
-      const isActive:string = "text-green-200"
-      const menuStyle:string = "bg-[#333] flex gap-x-3 text text-xl px-3 py-2 rounded-md"
-      const floatIcon = "bg-[#333] p-2 rounded-full justify-center items-center"
+      const iconClass:string =  "text-[rgb(113,113,122)] hover:text-[rgb(9,9,11)] transition-colors"
+      const isActive:string = "text-[rgb(9,9,11)]"
+      const menuStyle:string = "bg-white border border-gray-200 shadow-lg flex gap-x-3 text-xl px-3 py-2 rounded-xl"
+      const floatIcon = "bg-white border border-gray-200 shadow-sm p-2 rounded-full justify-center items-center hover:bg-gray-50"
       // interface BtnDetails{
       //   onclick:void;
       //   isActive:string;
@@ -163,7 +163,7 @@ const TextEditor:FC<EditorProps> = ({editor}) => {
               onClose={onClose}
               additionalWork={addImage} 
             />
-            <span className='bg-[#333] text-2xl flex justify-center gap-x-4 px-4 py-2  rounded-t-md max-sm:overflow-scroll max-sm:px-6'>
+            <span className='bg-white border border-gray-200 text-xl flex justify-center gap-x-4 px-4 py-2.5 rounded-xl mb-4 max-sm:overflow-x-auto max-sm:px-4 flex-wrap gap-y-2'>
                 <button
                     onClick={() => editor.chain().focus().toggleCode().run()}
                     disabled={

@@ -20,7 +20,6 @@ const nextAuthConfig: NextAuthConfig = {
   // Explicitly set the NEXTAUTH_URL if necessary
   callbacks: {
     async redirect({ url, baseUrl }) {
-      console.log(process.env.NEXTAUTH_URL,url, baseUrl,"......jlsdfjlksdjflkjfsdlk");
       return process.env.NEXTAUTH_URL || baseUrl;
     },
   },

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import { GoogleTagManager } from '@next/third-parties/google'
-import HomeLayout from "@/components/layoutComponents/HomeLayout/HomeLayout";
 import { ToastContainer } from 'react-toastify';
 // @ts-ignore
 import 'react-toastify/dist/ReactToastify.css';
@@ -9,14 +8,12 @@ import "./globals.css";
 import ReduxProvider from "@/redux/Provider";
 import { auth } from "@/backend/auth/auth";
 import { SessionProvider } from "next-auth/react"
-import Navbar from "@/components/layoutComponents/Navbar";
 const inter = Inter({ subsets: ["latin"] });
-export const dynamic = "force-dynamic";
-
-export const source_serif_4 = Source_Serif_4({
+const source_serif_4 = Source_Serif_4({
   subsets: ['latin'],
   variable: '--source_serif_4',
-})
+});
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.BASE_URL || "https://biyondbytes.com"),
@@ -54,10 +51,7 @@ try {
       <body className={` !overflow-x-hidden ${inter.className} ${source_serif_4.variable}`}>
         <SessionProvider session={session}>
           <ReduxProvider>
-            <HomeLayout>
-              <Navbar />
-              {children}
-            </HomeLayout>
+            {children}
           </ReduxProvider>
           <ToastContainer
             position="top-right"

@@ -1,17 +1,20 @@
 import Link from 'next/link'
-import React from 'react'
 
-const TagCard = ({title,value}:{title:string,value:string[]}) => {
+const TagCard = ({ title, value }: { title: string; value: string[] }) => {
   return (
-    <div className='w-11/12 min-w-80 max-w-96 sm:w-1/2 md:w-1/3  px-4 py-2 shadow mx-4 my-2'>
-        <h2 className='text-3xl font-medium capitalize my-4'>{title}</h2>
-      <ul className='text-gray-500 text-xl flex flex-col gap-y-2'>
-        {value.map(tag => (
-          <li  className='capitalize' key={tag}>
-            <Link href={`search?tags=${tag}`}>{tag}</Link>
-          </li>
-        ))}`
-      </ul>
+    <div className="border-t border-gray-100 pt-6 pb-2">
+      <p className="text-[11px] font-bold tracking-[0.18em] uppercase text-gray-400 mb-4">{title}</p>
+      <div className="flex flex-wrap gap-2">
+        {value.map((tag) => (
+          <Link
+            key={tag}
+            href={`/search?tags=${tag}`}
+            className="inline-flex items-center px-4 py-1.5 rounded-full border border-gray-200 text-sm text-[rgb(9,9,11)] font-medium capitalize hover:bg-[rgb(9,9,11)] hover:text-white hover:border-[rgb(9,9,11)] transition-all duration-150"
+          >
+            {tag}
+          </Link>
+        ))}
+      </div>
     </div>
   )
 }

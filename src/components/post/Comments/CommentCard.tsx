@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { BsReply } from "react-icons/bs";
-import { BiLike } from "react-icons/bi";
-import { BiDislike } from "react-icons/bi";
 import DropDown from "@/components/layoutComponents/Button/Dropdown";
-import { MdDeleteOutline, MdReportProblem } from "react-icons/md";
-import { CiEdit } from "react-icons/ci";
 import Link from "next/link";
 import axios from "axios";
 import ReplyCommentsCard from "./ReplyCommentsCard";
+import { CornerDownRight, ThumbsDown, ThumbsUp, Edit, Trash2, AlertTriangle } from "lucide-react";
+
 interface CommentCardProps {
   comment: {
     UserImage: string;
@@ -43,17 +40,18 @@ const CommentCard: React.FC<
   const [seeReply, setSeeReply] = useState([]);
   const [seeReplyComments, setSeeReplyComments] = useState<boolean>(false);
   let success = false;
+  
   const addRemoveLike = async (commentsId: string) => {
     try {
       const res = await axios.post(`/api/user/comment/like/${commentsId}`);
       success = true;
       return null;
     } catch (error) {
-      // console.log(error);
       success = false;
       return null;
     }
   };
+  
   const replyTocomment = (commentsId: string) => {
     setReplyId(commentsId);
     setIsReply(true);
@@ -66,32 +64,34 @@ const CommentCard: React.FC<
   const commentsElements = [
     {
       name: "Like",
-      icon: <BiLike />,
+      icon: <ThumbsUp className="w-3.5 h-3.5" />,
       apiFunction: addRemoveLike,
     },
     {
       name: "Reply",
-      icon: <BsReply />,
+      icon: <CornerDownRight className="w-3.5 h-3.5" />,
       apiFunction: replyTocomment,
     },
   ];
+  
   const dropdownElements = [
     {
       name: "Edit",
-      icon: <CiEdit className="w-6 max-sm:w-4 h-6 max-sm:h-4 " />,
-      className: "text-black",
+      icon: <Edit className="w-4 h-4" />,
+      className: "text-white hover:text-bb-accent",
     },
     {
       name: "Delete",
-      icon: <MdDeleteOutline className="w-6 max-sm:w-4 h-6 max-sm:h-4" />,
-      className: "text-black",
+      icon: <Trash2 className="w-4 h-4" />,
+      className: "text-red-400 hover:text-red-300",
     },
     {
       name: "Report",
-      icon: <MdReportProblem className="w-6 max-sm:w-4 h-6 max-sm:h-4" />,
-      className: "text-red-500 ",
+      icon: <AlertTriangle className="w-4 h-4" />,
+      className: "text-yellow-500 hover:text-yellow-400",
     },
   ];
+  
   const handleClickReplyComments = async (commentsId: string) => {
     try {
       const res = await axios.get(`/api/user/comment/get/reply/${commentsId}`);
@@ -100,98 +100,93 @@ const CommentCard: React.FC<
         setSeeReply(res.data.data);
         setReplyComments(res.data.data);
       }
-      
-      
     } catch (error) {
-      // console.log(error);
     }
   };
-  // useEffect(() => {
-  //   handleClickReplyComments(comment.id);
-  // }, [seeReplyComments]);
+
   return (
     <>
-      <article className=" text-base bg-white rounded-lg dark:bg-gray-900 px-2 mt-3 border ">
-        <footer className="flex justify-between items-start !relative  !px-0 !py-3 mt-5">
-          <div className=" items-center">
-            <div className="flex w-full ">
-              <Image
-                width={24}
-                height={24}
-                className="mr-2 w-6 h-6 relative max-sm:top-2.5 md:top-1 rounded-full"
-                src={
-                  comment.UserImage
-                    ? comment.UserImage
-                    : "https://lh3.googleusercontent.com/a/ACg8ocKGKHmisSQpCqk2ykJStKwGDGu95aV_zi976oOn06DbmV8=s96-c"
-                }
-                alt="Michael Gough"
-              />
-              <p className="inline-flex items-center !capitalize mr-3 max-sm:w-36 text-sm text-gray-900 dark:text-white font-semibold">
+      <article className="text-base bg-white rounded-xl px-5 py-4 mt-4 border border-gray-100">
+        <footer className="flex justify-between items-start mb-3">
+          <div className="flex items-center">
+            <Image
+              width={32}
+              height={32}
+              className="mr-3 w-8 h-8 rounded-full border border-white/10"
+              src={
+                comment.UserImage
+                  ? comment.UserImage
+                  : "https://lh3.googleusercontent.com/a/ACg8ocKGKHmisSQpCqk2ykJStKwGDGu95aV_zi976oOn06DbmV8=s96-c"
+              }
+              alt={comment.name}
+            />
+            <div>
+              <p className="inline-flex items-center font-semibold text-sm text-[rgb(9,9,11)] capitalize mr-3">
                 {comment.name}
               </p>
+              <p className="text-xs text-bb-muted">
+                <time dateTime={comment.createdAt}>
+                  {comment.createdAt.split("T")[0]}
+                </time>
+              </p>
             </div>
-            <p className="text-sm text-gray-600 md:ml-8 max-sm:ml-8   dark:text-gray-400">
-              <time dateTime="2022-02-08" title="February 8th, 2022">
-                {comment.createdAt.split("T")[0]}
-              </time>
-            </p>
           </div>
           <DropDown
-            className="text-black"
+            className="text-white"
             content={dropdownElements}
           ></DropDown>
         </footer>
-        <p className="text-gray-500 text-start dark:text-gray-400">
+        
+        <p className="text-gray-600 text-sm leading-relaxed mb-4">
           {comment.comment}
         </p>
-        <div className="flex items-center mt-4 space-x-3">
-          {commentsElements.map((item, index) => (
-            <div
-              key={index}
-              className="cursor-pointer flex items-center text-center  pb-2 text-black  "
-            >
-              <Link className="text-xs  mr-1.5" href={`#`}>
-                {item.name === "Like" ? comment?.likesCount : ""} {item.name}
-              </Link>
-              <span
+        
+        <div className="flex justify-between items-center mt-4">
+          <div className="flex items-center space-x-4">
+            {commentsElements.map((item, index) => (
+              <div
+                key={index}
+                className="cursor-pointer flex items-center gap-1.5 text-xs text-gray-400 hover:text-bb-accent transition-colors"
                 onClick={async (event) => {
                   event.preventDefault();
                   try {
                     await item.apiFunction(comment.id);
-                  } catch (error) {
-                    // console.error(error);
-                  }
+                  } catch (error) {}
                 }}
               >
                 {item.icon}
-              </span>
-            </div>
-          ))}
+                <span>
+                  {item.name === "Like" ? comment?.likesCount : ""} {item.name}
+                </span>
+              </div>
+            ))}
+          </div>
+          
           {comment.repliesCount > 0 && (
-            <div className="flex items-center w-2/3 max-sm:w-1/3 text-xs  mr-1.5 mb-1 space-x-3">
-              <span
-                onClick={() => handleClickReplyComments(comment.id)}
-                className=" cursor-pointer mx-auto"
-              >
-                View all {comment.repliesCount} replies
-              </span>
-            </div>
+            <button
+              onClick={() => handleClickReplyComments(comment.id)}
+              className="text-xs font-medium text-bb-accent hover:text-bb-accent/80 transition-colors"
+            >
+              View all {comment.repliesCount} replies
+            </button>
           )}
         </div>
-        {/* make view all replies */}
       </article>
-     {seeReplyComments? 
-      <div className="pl-4  border-l-2 border-black">
-        {seeReplyComments &&
-          seeReply.map((replyComment: any, index) => (
-            <ReplyCommentsCard key={index} comment={replyComment} 
-            setIsReply={setIsReply}
-            isReply
-            setReplyUserName={setReplyUserName}
-            setReplyId={setReplyId}
+      
+      {seeReplyComments && seeReply.length > 0 && (
+        <div className="pl-6 ml-4 mt-2 border-l border-gray-100 flex flex-col gap-2">
+          {seeReply.map((replyComment: any, index) => (
+            <ReplyCommentsCard 
+              key={index} 
+              comment={replyComment} 
+              setIsReply={setIsReply}
+              isReply
+              setReplyUserName={setReplyUserName}
+              setReplyId={setReplyId}
             />
           ))}
-      </div>:""}
+        </div>
+      )}
     </>
   );
 };
