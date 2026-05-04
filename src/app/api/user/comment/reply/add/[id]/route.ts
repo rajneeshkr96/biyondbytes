@@ -1,98 +1,83 @@
 import { NextResponse } from "next/server";
 import { dataBasePrisma } from "@/databasePrisma";
-import { currentUser } from "@/lib/authDet";
 import { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-export async function POST(req:NextRequest,context:{params:{id:string}}) {
-    const COMMENT_SELECT_FIELDS = {
-        id: true,
-        comment: true,
-        parentId: true,
-        createdAt: true,
-        repliesCount: true,
-        User: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      }
-    try {
-        const commentId = context.params.id;
-        const {comment} = await req.json();
-        const user = await currentUser();
-        const userComment = await dataBasePrisma.comment.findMany({
-            where:{
-                id:commentId
-            }
-        });
-        const parentUserDet = await dataBasePrisma.user.findUnique({
-            where:{
-                id:userComment[0].UserId
-            },
-            select:{
-                username:true,
-                image:true,
-                
-            }
-        });
-        const usr = await dataBasePrisma.user.findUnique({
-            where:{
-                id:user?.userId
-            },
-            select:{
-                id:true,
-                username:true,
-                image:true,
-                name:true,
-            }
-        });
-        if(!userComment){
-            return NextResponse.json( { success: false, message: "comment not found" }, { status: 404 });
-        }
-        const parentIds =[...userComment[0]?.parentId,commentId];
-        const res = await dataBasePrisma.comment.create({
-            data: {
-              comment: comment,
-              parentId: { set: parentIds },
-              UserId: usr!.id,
-              UserName: usr?.username,
-              UserImage: usr?.image,
-              ReplyUserName: parentUserDet?.username,     
-              name: usr?.name,     
-            },
-            select: COMMENT_SELECT_FIELDS,
-          });
-          console.log("0.................",res.parentId[0])
-          
-       if(res.parentId ){
+export async function POST(req: NextRequest, context: { params: { id: string } }) {
+  try {
+    const commentId = context.params.id;
+    const { comment } = await req.json();
 
-        console.log("pareneidndidid....",res.parentId)
-        const updateParentComment = await dataBasePrisma.comment.update({
-            where: {
-                id: res.parentId[0],
-            },
-            data: {
-                repliesCount:{
-                    increment:1
-                },
+    // Read JWT directly (same pattern as comment/add)
+    const token = await getToken({
+      req,
+      secret: process.env.NEXTAUTH_SECRET!,
+      salt: "authjs.session-token",
+    });
 
-                // append comment id from last
-                
-                
-            },
-        });
-        console.log("updateParentComment",updateParentComment);
-       } 
-       
-        return NextResponse.json(
-            { success: true, message: "comment added successfully", data: res },
-            { status: 200 }
-        );
-        
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ success: false, message: error }, { status: 500 });
-        
+    // Resolve MongoDB user ID: prefer token.userId, fall back to email lookup
+    let userId = token?.userId as string | undefined;
+    if (!userId && token?.email) {
+      const dbUser = await dataBasePrisma.user.findUnique({
+        where: { email: token.email as string },
+        select: { id: true },
+      });
+      userId = dbUser?.id;
     }
+
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, message: "You must be signed in to reply." },
+        { status: 401 }
+      );
+    }
+
+    // Find the parent comment to build parentId chain
+    const parentComment = await dataBasePrisma.comment.findUnique({
+      where: { id: commentId },
+    });
+    if (!parentComment) {
+      return NextResponse.json({ success: false, message: "Comment not found." }, { status: 404 });
+    }
+
+    // Get the original commenter's username for ReplyUserName
+    const parentUserDet = await dataBasePrisma.user.findUnique({
+      where: { id: parentComment.UserId },
+      select: { username: true },
+    });
+
+    // Get the replying user's details
+    const usr = await dataBasePrisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, username: true, image: true, name: true },
+    });
+
+    const parentIds = [...(parentComment.parentId ?? []), commentId];
+
+    const res = await dataBasePrisma.comment.create({
+      data: {
+        comment,
+        parentId: { set: parentIds },
+        UserId: userId,
+        UserName: usr?.username ?? (token?.name as string) ?? "",
+        UserImage: usr?.image ?? null,
+        ReplyUserName: parentUserDet?.username ?? "",
+        name: usr?.name ?? (token?.name as string) ?? "",
+      },
+    });
+
+    // Increment repliesCount on the direct parent
+    await dataBasePrisma.comment.update({
+      where: { id: commentId },
+      data: { repliesCount: { increment: 1 } },
+    });
+
+    return NextResponse.json(
+      { success: true, message: "Reply added successfully", data: res },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("[ADD REPLY]", error);
+    return NextResponse.json({ success: false, message: "Something went wrong." }, { status: 500 });
+  }
 }

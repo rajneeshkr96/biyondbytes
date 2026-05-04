@@ -10,19 +10,19 @@ export default async function middleware(request: NextRequest) {
 
   if (request.nextUrl.pathname.startsWith('/write/') && !isAuthenticated) {
     return NextResponse.redirect(new URL('/', request.url))
-  }else if (request.nextUrl.pathname.startsWith('/login') && !!isAuthenticated){
+  } else if (request.nextUrl.pathname.startsWith('/dashboard') && !isAuthenticated) {
+    return NextResponse.redirect(new URL('/byAuthBtn', request.url))
+  } else if (request.nextUrl.pathname.startsWith('/login') && !!isAuthenticated){
     return NextResponse.redirect(new URL('/', request.url))
-  }else if (request.nextUrl.pathname.startsWith('/register') && !!isAuthenticated){
+  } else if (request.nextUrl.pathname.startsWith('/register') && !!isAuthenticated){
     return NextResponse.redirect(new URL('/', request.url))
-  }else if (request.nextUrl.pathname.startsWith('/byAuthBtn') && !!isAuthenticated){
+  } else if (request.nextUrl.pathname.startsWith('/byAuthBtn') && !!isAuthenticated){
     return NextResponse.redirect(new URL('/', request.url))
-  }
-  else if (request.nextUrl.pathname.startsWith('/profile/' ) && !isAuthenticated){
+  } else if (request.nextUrl.pathname.startsWith('/profile/' ) && !isAuthenticated){
     return NextResponse.redirect(new URL('/', request.url))
-  }
-  else if (request.nextUrl.pathname.startsWith('/me/') && !isAuthenticated){
+  } else if (request.nextUrl.pathname.startsWith('/me/') && !isAuthenticated){
     return NextResponse.redirect(new URL('/', request.url))
-  }else {
+  } else {
     // Allow authenticated or unauthenticated users for other routes
     return NextResponse.next();
   }

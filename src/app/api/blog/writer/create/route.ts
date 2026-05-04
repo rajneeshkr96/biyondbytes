@@ -1,56 +1,71 @@
 import { dataBasePrisma } from "@/databasePrisma";
-import { currentRole } from "@/lib/authDet";
-import { NextRequest,NextResponse } from "next/server";
-import { currentUserId } from "@/lib/authDet";
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 import readingTime from 'reading-time';
-export interface BlogPops {
-  title: string;
-  image: object;
-  tags: string[];
-  content: string;
-  metaTitle: string;
-  metaDesc: string;
-}
 
-const genrateSlug = async (title:string) => {
-  // remove all the special characters from the title
-  title = title.replace(/[^a-zA-Z0-9 ]/g, "");
-  const slug = await dataBasePrisma.blog.findUnique({
-    where: {
-      slug: title.split(" ").join("-"),
-    },
+const generateSlug = async (title: string) => {
+  const baseSlug = title
+    .replace(/[^a-zA-Z0-9 ]/g, "")
+    .split(" ")
+    .filter(Boolean)
+    .join("-")
+    .toLowerCase();
+
+  const existing = await dataBasePrisma.blog.findUnique({
+    where: { slug: baseSlug },
   });
-  if (slug) {
-    const time:string = new Date().getTime().toString();
-    return title.split(" ").join("-") + "-" + time;
+
+  if (existing) {
+    return `${baseSlug}-${new Date().getTime()}`;
   }
-  else{
-    return title.split(" ").join("-");
-  }
-  
-}
-export async function POST(request: NextRequest) {
+  return baseSlug;
+};
+
+export async function POST(req: NextRequest) {
   try {
-    const {title,tags,image,content,metaTitle,metaDesc}:BlogPops = await request.json();
-    // todo remove id sting 
-    const authorId = await currentUserId() || "65e6de30136474657e223231";
+    const { title, tags, image, content, metaTitle, metaDesc } = await req.json();
+
+    // Read JWT directly — more reliable than auth() in Route Handlers
+    const token = await getToken({
+      req,
+      secret: process.env.NEXTAUTH_SECRET!,
+      salt: "authjs.session-token",
+    });
+
+    // Resolve MongoDB user ID
+    let userId = token?.userId as string | undefined;
+    if (!userId && token?.email) {
+      const dbUser = await dataBasePrisma.user.findUnique({
+        where: { email: token.email as string },
+        select: { id: true },
+      });
+      userId = dbUser?.id;
+    }
+
+    if (!userId) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
     const readTime = readingTime(content).text;
+    const slug = await generateSlug(title);
+
     const blog = await dataBasePrisma.blog.create({
       data: {
-        title: title,
-        tags: tags,
-        image: image,
-        content: content,
-        metaTitle: metaTitle,
-        metaDesc: metaDesc,
-        authorId: authorId,
-        readTime: readTime,
-        slug: await genrateSlug(title),
+        title,
+        tags,
+        image,
+        content,
+        metaTitle,
+        metaDesc,
+        authorId: userId,
+        readTime,
+        slug,
       },
     });
+
     return NextResponse.json({ success: true, message: "Blog created successfully", data: blog }, { status: 201 });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ success: false, message: error }, { status: 500 });
+    console.error("[CREATE BLOG]", error);
+    return NextResponse.json({ success: false, message: "Something went wrong." }, { status: 500 });
   }
 }

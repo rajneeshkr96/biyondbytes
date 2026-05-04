@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { currentUserProfile } from "@/lib/authDet";
+import { currentUser } from "@/lib/authDet";
 import Image from "next/image";
 import { Search, PenLine } from "lucide-react";
 
@@ -10,13 +10,19 @@ const navLinks = [
   { name: "Tags", href: "/tags" },
 ];
 
-const Navbar = async ({ dark = false }: { dark?: boolean }) => {
-  const image = await currentUserProfile();
-  const isDark = dark;
+interface NavbarProps {
+  dark?: boolean;
+  hideSearchWrite?: boolean;
+  showUserInfo?: boolean;
+}
+
+const Navbar = async ({ dark = false, hideSearchWrite = false, showUserInfo = false }: NavbarProps) => {
+  const user = await currentUser();
+  const image = user?.image;
 
   return (
     <nav className="fixed top-0 left-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 transition-all duration-300">
-      <div className="bb-container flex items-center justify-between h-14">
+      <div className="bb-container flex items-center justify-between h-14 px-4 md:px-8">
         {/* Logo */}
         <Link
           href="/"
@@ -40,33 +46,46 @@ const Navbar = async ({ dark = false }: { dark?: boolean }) => {
 
         {/* Right actions */}
         <div className="flex items-center gap-2">
-          <Link
-            href="/search"
-            className="p-2 text-gray-400 hover:text-[rgb(9,9,11)] hover:bg-gray-100 rounded-full transition-all"
-            aria-label="Search"
-          >
-            <Search className="w-4 h-4" />
-          </Link>
-
-          {!!image ? (
+          {!hideSearchWrite && (
             <>
               <Link
-                href="/write/new"
-                className="hidden sm:inline-flex items-center gap-1.5 text-[13px] font-medium text-gray-500 hover:text-[rgb(9,9,11)] hover:bg-gray-100 px-3 py-1.5 rounded-full transition-all"
+                href="/search"
+                className="p-2 text-gray-400 hover:text-[rgb(9,9,11)] hover:bg-gray-100 rounded-full transition-all"
+                aria-label="Search"
               >
-                <PenLine className="w-3.5 h-3.5" />
-                Write
+                <Search className="w-4 h-4" />
               </Link>
-              <Link href="/settings">
+
+              {!!image && (
+                <Link
+                  href="/dashboard/create"
+                  className="hidden sm:inline-flex items-center gap-1.5 text-[13px] font-medium text-gray-500 hover:text-[rgb(9,9,11)] hover:bg-gray-100 px-3 py-1.5 rounded-full transition-all"
+                >
+                  <PenLine className="w-3.5 h-3.5" />
+                  Write
+                </Link>
+              )}
+            </>
+          )}
+
+          {!!user ? (
+            <div className="flex items-center gap-3 ml-2">
+              {showUserInfo && (
+                <div className="text-right hidden sm:block">
+                  <p className="text-[12px] font-semibold text-[rgb(9,9,11)] leading-tight">{user.name}</p>
+                  <p className="text-[10px] text-gray-400">{user.email}</p>
+                </div>
+              )}
+              <Link href="/dashboard" className="shrink-0">
                 <Image
-                  src={image}
+                  src={image || "/avatar-placeholder.png"}
                   alt="profile"
-                  width={30}
-                  height={30}
-                  className="rounded-full w-[30px] h-[30px] object-cover ring-1 ring-gray-200 hover:ring-[#462C7D] transition-all"
+                  width={32}
+                  height={32}
+                  className="rounded-full w-8 h-8 object-cover ring-1 ring-gray-200 hover:ring-[#462C7D] transition-all"
                 />
               </Link>
-            </>
+            </div>
           ) : (
             <Link
               href="/byAuthBtn"

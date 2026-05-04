@@ -1,119 +1,131 @@
 "use client";
-import React,{useEffect, useState} from "react";
-import { SendHorizontal } from "lucide-react";
-import MediaQuery from "@/components/layoutComponents/MediaQuery";
-import SubmitButton from "@/components/layoutComponents/Button/SubmitButton";
+import React, { useEffect, useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm,SubmitHandler, set  } from "react-hook-form";
 import * as yup from "yup";
 import axios from "axios";
+import { SendHorizontal, X } from "lucide-react";
+import { toast } from "react-toastify";
 
-type CommentsInputProps = {
-  comment:string;
-};
+type FormValues = { comment: string };
 
-interface CommentsInputPropsd {
-  id:string;
-  isReply?:boolean;
-  setIsReply?:(value:boolean)=>void;
-  replyUserName?:string;
+interface CommentsInputProps {
+  id: string;
+  isReply?: boolean;
+  replyUserName?: string;
+  setIsReply?: (value: boolean) => void;
+  onCommentPosted?: () => void; // callback to refresh list
 }
 
-const CommentsInput:React.FC<CommentsInputPropsd> = ({id,isReply,setIsReply,replyUserName}) => {
-  const [comment, setComment] = useState<Boolean>(false);
+const schema = yup.object({ comment: yup.string().required().min(6).max(500) });
 
-  const validateSchema = yup.object().shape({
-    comment: yup.string().required()
-    .max(500)
-    .min(6),
-  });
-  
-  const forOptions = {resolver:yupResolver(validateSchema)};
-  const {register,handleSubmit,formState:{errors},watch,reset,setFocus} = useForm<CommentsInputProps>(forOptions);
-  
-  const onSubmit: SubmitHandler<CommentsInputProps> = async data => {
-      try {
-        if(isReply){
-          const res = await axios.post(`/api/user/comment/reply/add/${id}`,data);
-          if(res){
-            setIsReply && setIsReply(true);
-            setComment(false);
-            reset();
-          }
-        }else{
-          const res = await axios.post(`/api/user/comment/add/${id}`,data);
-       
-          if(res){
-            setComment(false);
-            reset();
-          }
-        }
-    } catch (error) {
+const CommentsInput: React.FC<CommentsInputProps> = ({
+  id,
+  isReply,
+  replyUserName,
+  setIsReply,
+  onCommentPosted,
+}) => {
+  const [focused, setFocused] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setFocus,
+    formState: { errors },
+  } = useForm<FormValues>({ resolver: yupResolver(schema) });
+
+  const watchedValue = watch("comment", "");
+
+  // Auto-focus when entering reply mode
+  useEffect(() => {
+    if (isReply) setFocus("comment");
+  }, [isReply, setFocus]);
+
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    setSubmitting(true);
+    try {
+      if (isReply) {
+        await axios.post(`/api/user/comment/reply/add/${id}`, data);
+        setIsReply && setIsReply(false);
+        toast.success("Reply posted!");
+      } else {
+        await axios.post(`/api/user/comment/add/${id}`, data);
+        toast.success("Comment posted!");
+      }
+      reset();
+      setFocused(false);
+      // Trigger parent re-fetch — no more polling needed
+      onCommentPosted?.();
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Failed to post. Please sign in.";
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
     }
   };
-  
-  const watchedComment = watch("comment", "");
-  
-  useEffect(() => {
-    if (watchedComment.length > 0) {
-      setComment(true);
-    } else {
-      setComment(false);
-    }
-  }, [watchedComment,isReply]);
- 
-  if(isReply){
-    setFocus("comment");
-  }
+
+  const handleCancel = () => {
+    reset();
+    setFocused(false);
+    setIsReply && setIsReply(false);
+  };
 
   return (
     <div className="w-full">
-      <form onSubmit={handleSubmit(onSubmit)} className="w-full" action="#">
-        <div className="relative w-full min-w-[200px] h-auto">
-          <MediaQuery maxSize={999}>
-            <div className="absolute grid w-5 h-5 place-items-center text-bb-muted top-2/4 right-3 -translate-y-2/4">
-              <button className="!bg-none !border-none p-0 m-0 hover:text-bb-accent transition-colors">
-                <SendHorizontal
-                  type="submit"
-                  className="cursor-pointer max-sm:w-4 max-sm:h-4 text-xl"
-                />
+      {isReply && (
+        <div className="flex items-center gap-2 text-xs text-[#462C7D] font-medium mb-2 bg-violet-50 border border-violet-100 rounded-lg px-3 py-2">
+          <span>Replying to <span className="font-bold">@{replyUserName}</span></span>
+          <button onClick={handleCancel} className="ml-auto text-gray-400 hover:text-gray-600">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+        <div
+          className={`relative w-full rounded-2xl border transition-all duration-200 bg-white ${
+            focused || isReply
+              ? "border-[#462C7D] shadow-sm shadow-violet-100"
+              : "border-gray-200"
+          }`}
+        >
+          <textarea
+            {...register("comment")}
+            rows={focused || isReply ? 3 : 1}
+            onFocus={() => setFocused(true)}
+            placeholder={isReply ? `Reply to @${replyUserName}…` : "Add a comment…"}
+            className="w-full bg-transparent text-sm text-gray-800 placeholder-gray-400 px-4 py-3 outline-none resize-none rounded-2xl leading-relaxed"
+          />
+          <div
+            className={`flex items-center justify-between px-3 pb-3 transition-all ${
+              focused || watchedValue?.length > 0 || isReply ? "opacity-100" : "opacity-0 pointer-events-none h-0 overflow-hidden"
+            }`}
+          >
+            {errors.comment && (
+              <p className="text-xs text-red-500">{errors.comment.message}</p>
+            )}
+            <div className="flex items-center gap-2 ml-auto">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="flex items-center gap-1.5 px-4 py-1.5 bg-[rgb(9,9,11)] text-white text-xs font-semibold rounded-lg hover:bg-gray-800 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                <SendHorizontal className="w-3 h-3" />
+                {submitting ? "Posting…" : isReply ? "Reply" : "Comment"}
               </button>
             </div>
-          </MediaQuery>
-          <MediaQuery minSize={1000}>
-            {comment ? (
-              <div className="absolute right-0 top-12 flex flex-row-reverse gap-4 my-1">
-                <SubmitButton
-                  type="submit"
-                  mainClass="px-5 py-2 border border-bb-accent bg-bb-accent hover:bg-[#00E5C0] text-[#0A0A0A] font-medium rounded-full text-sm transition-all"
-                >Comment</SubmitButton>
-                
-                <SubmitButton
-                  type="reset"
-                  mainClass="px-5 py-2 border border-gray-200 text-gray-500 bg-transparent hover:bg-gray-100 rounded-full font-medium text-sm transition-all"
-                >cancel</SubmitButton>
-              </div>
-            ) : (
-              ""
-            )}
-          </MediaQuery>
-          <input
-            {...register("comment", {
-              onBlur: () => {
-                (setIsReply && !comment) && setIsReply(false);
-              },
-              required: "Comment is required",
-              maxLength: 500,
-            })}
-            className="peer w-full h-full bg-transparent text-gray-800 placeholder-transparent border-b-2 border-gray-200 focus:border-bb-accent outline-none text-sm px-1 py-4 transition-all"
-            placeholder=" "
-          />
-          {errors.comment && (
-            <p className="text-red-400 text-xs mt-1">{errors.comment.message}</p>
-          )}
-          <label className="absolute left-1 top-4 text-sm text-gray-400 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:top-4 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-bb-accent pointer-events-none">
-            {isReply ? `Reply to ${replyUserName}` : "Add a comment..."}
-          </label>
+          </div>
         </div>
       </form>
     </div>

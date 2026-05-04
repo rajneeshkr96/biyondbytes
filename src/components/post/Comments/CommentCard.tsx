@@ -1,193 +1,170 @@
-import React, { useEffect, useState } from "react";
+"use client";
+import React, { useState } from "react";
 import Image from "next/image";
-import DropDown from "@/components/layoutComponents/Button/Dropdown";
-import Link from "next/link";
 import axios from "axios";
 import ReplyCommentsCard from "./ReplyCommentsCard";
-import { CornerDownRight, ThumbsDown, ThumbsUp, Edit, Trash2, AlertTriangle } from "lucide-react";
+import { CornerDownRight, ThumbsUp } from "lucide-react";
 
-interface CommentCardProps {
-  comment: {
-    UserImage: string;
-    name: string;
-    createdAt: string;
-    comment: string;
-    UserName: string;
-    ReplyUserName?: string;
-    likesCount: number;
-    repliesCount: number;
-    id: string;
-    Blogid?: string;
-  };
+interface CommentData {
+  id: string;
+  UserImage: string;
+  name: string;
+  createdAt: string;
+  comment: string;
+  UserName: string;
+  ReplyUserName?: string;
+  likesCount: number;
+  repliesCount: number;
+  BlogId?: string;
 }
 
-const CommentCard: React.FC<
-  CommentCardProps & {
-    isReply: boolean;
-    setIsReply: (value: boolean) => void;
-    setReplyUserName: (value: string) => void;
-    setReplyId: (value: string) => void;
-    setReplyComments: (value: Array<CommentCardProps[]>) => void;
-  }
-> = ({
+interface CommentCardProps {
+  comment: CommentData;
+  isReply: boolean;
+  setIsReply: (value: boolean) => void;
+  setReplyUserName: (value: string) => void;
+  setReplyId: (value: string) => void;
+  onReplyPosted?: () => void;
+}
+
+const CommentCard: React.FC<CommentCardProps> = ({
   comment,
   isReply,
   setIsReply,
   setReplyUserName,
   setReplyId,
-  setReplyComments,
+  onReplyPosted,
 }) => {
-  const [seeReply, setSeeReply] = useState([]);
-  const [seeReplyComments, setSeeReplyComments] = useState<boolean>(false);
-  let success = false;
-  
-  const addRemoveLike = async (commentsId: string) => {
+  const [replies, setReplies] = useState<any[]>([]);
+  const [showReplies, setShowReplies] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(comment.likesCount);
+  const [loadingReplies, setLoadingReplies] = useState(false);
+
+  const handleLike = async () => {
     try {
-      const res = await axios.post(`/api/user/comment/like/${commentsId}`);
-      success = true;
-      return null;
-    } catch (error) {
-      success = false;
-      return null;
-    }
-  };
-  
-  const replyTocomment = (commentsId: string) => {
-    setReplyId(commentsId);
-    setIsReply(true);
-    if (isReply) {
-      setReplyUserName(comment.UserName);
-    }
-    return isReply;
+      await axios.post(`/api/user/comment/like/${comment.id}`);
+      setLiked((prev) => !prev);
+      setLikesCount((prev) => (liked ? prev - 1 : prev + 1));
+    } catch {}
   };
 
-  const commentsElements = [
-    {
-      name: "Like",
-      icon: <ThumbsUp className="w-3.5 h-3.5" />,
-      apiFunction: addRemoveLike,
-    },
-    {
-      name: "Reply",
-      icon: <CornerDownRight className="w-3.5 h-3.5" />,
-      apiFunction: replyTocomment,
-    },
-  ];
-  
-  const dropdownElements = [
-    {
-      name: "Edit",
-      icon: <Edit className="w-4 h-4" />,
-      className: "text-white hover:text-bb-accent",
-    },
-    {
-      name: "Delete",
-      icon: <Trash2 className="w-4 h-4" />,
-      className: "text-red-400 hover:text-red-300",
-    },
-    {
-      name: "Report",
-      icon: <AlertTriangle className="w-4 h-4" />,
-      className: "text-yellow-500 hover:text-yellow-400",
-    },
-  ];
-  
-  const handleClickReplyComments = async (commentsId: string) => {
-    try {
-      const res = await axios.get(`/api/user/comment/get/reply/${commentsId}`);
-      if (res.data.success) {
-        setSeeReplyComments(true);
-        setSeeReply(res.data.data);
-        setReplyComments(res.data.data);
-      }
-    } catch (error) {
+  const handleReply = () => {
+    setReplyId(comment.id);
+    setReplyUserName(comment.UserName || comment.name);
+    setIsReply(true);
+  };
+
+  const handleToggleReplies = async () => {
+    if (showReplies) {
+      setShowReplies(false);
+      return;
     }
+    setLoadingReplies(true);
+    try {
+      const res = await axios.get(`/api/user/comment/get/reply/${comment.id}`);
+      if (res.data.success) {
+        setReplies(res.data.data);
+        setShowReplies(true);
+      }
+    } catch {}
+    finally { setLoadingReplies(false); }
+  };
+
+  const timeAgo = (date: string) => {
+    const diff = Date.now() - new Date(date).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return `${days}d ago`;
+    return new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
   return (
-    <>
-      <article className="text-base bg-white rounded-xl px-5 py-4 mt-4 border border-gray-100">
-        <footer className="flex justify-between items-start mb-3">
-          <div className="flex items-center">
-            <Image
-              width={32}
-              height={32}
-              className="mr-3 w-8 h-8 rounded-full border border-white/10"
-              src={
-                comment.UserImage
-                  ? comment.UserImage
-                  : "https://lh3.googleusercontent.com/a/ACg8ocKGKHmisSQpCqk2ykJStKwGDGu95aV_zi976oOn06DbmV8=s96-c"
-              }
-              alt={comment.name}
-            />
-            <div>
-              <p className="inline-flex items-center font-semibold text-sm text-[rgb(9,9,11)] capitalize mr-3">
-                {comment.name}
-              </p>
-              <p className="text-xs text-bb-muted">
-                <time dateTime={comment.createdAt}>
-                  {comment.createdAt.split("T")[0]}
-                </time>
-              </p>
-            </div>
+    <div className="mt-4">
+      <article className="bg-white rounded-2xl border border-gray-100 px-5 py-4 hover:border-gray-200 transition-colors">
+        {/* Author row */}
+        <div className="flex items-start gap-3 mb-3">
+          <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+            {comment.UserImage ? (
+              <Image src={comment.UserImage} alt={comment.name || "User"} fill className="object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-[#462C7D] text-white font-bold text-xs">
+                {comment.name?.charAt(0)?.toUpperCase() ?? "U"}
+              </div>
+            )}
           </div>
-          <DropDown
-            className="text-white"
-            content={dropdownElements}
-          ></DropDown>
-        </footer>
-        
-        <p className="text-gray-600 text-sm leading-relaxed mb-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="font-semibold text-sm text-[rgb(9,9,11)] capitalize leading-tight">
+                {comment.name || "Anonymous"}
+              </span>
+              <span className="text-xs text-gray-400">{timeAgo(comment.createdAt)}</span>
+            </div>
+            {comment.ReplyUserName && (
+              <span className="text-xs text-gray-400">
+                replying to <span className="text-[#462C7D] font-medium">@{comment.ReplyUserName}</span>
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Comment text */}
+        <p className="text-sm text-gray-700 leading-relaxed pl-12 mb-3">
           {comment.comment}
         </p>
-        
-        <div className="flex justify-between items-center mt-4">
-          <div className="flex items-center space-x-4">
-            {commentsElements.map((item, index) => (
-              <div
-                key={index}
-                className="cursor-pointer flex items-center gap-1.5 text-xs text-gray-400 hover:text-bb-accent transition-colors"
-                onClick={async (event) => {
-                  event.preventDefault();
-                  try {
-                    await item.apiFunction(comment.id);
-                  } catch (error) {}
-                }}
-              >
-                {item.icon}
-                <span>
-                  {item.name === "Like" ? comment?.likesCount : ""} {item.name}
-                </span>
-              </div>
-            ))}
-          </div>
-          
+
+        {/* Actions */}
+        <div className="flex items-center gap-4 pl-12">
+          <button
+            onClick={handleLike}
+            className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
+              liked ? "text-[#462C7D]" : "text-gray-400 hover:text-gray-600"
+            }`}
+          >
+            <ThumbsUp className={`w-3.5 h-3.5 ${liked ? "fill-[#462C7D]" : ""}`} />
+            {likesCount > 0 && <span>{likesCount}</span>}
+            <span>Like</span>
+          </button>
+
+          <button
+            onClick={handleReply}
+            className="flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-[#462C7D] transition-colors"
+          >
+            <CornerDownRight className="w-3.5 h-3.5" />
+            Reply
+          </button>
+
           {comment.repliesCount > 0 && (
             <button
-              onClick={() => handleClickReplyComments(comment.id)}
-              className="text-xs font-medium text-bb-accent hover:text-bb-accent/80 transition-colors"
+              onClick={handleToggleReplies}
+              className="flex items-center gap-1 text-xs font-semibold text-[#462C7D] hover:text-[#462C7D]/70 transition-colors ml-auto"
             >
-              View all {comment.repliesCount} replies
+              {loadingReplies ? "Loading…" : showReplies ? "Hide replies" : `View ${comment.repliesCount} repl${comment.repliesCount === 1 ? "y" : "ies"}`}
             </button>
           )}
         </div>
       </article>
-      
-      {seeReplyComments && seeReply.length > 0 && (
-        <div className="pl-6 ml-4 mt-2 border-l border-gray-100 flex flex-col gap-2">
-          {seeReply.map((replyComment: any, index) => (
-            <ReplyCommentsCard 
-              key={index} 
-              comment={replyComment} 
+
+      {/* Replies */}
+      {showReplies && replies.length > 0 && (
+        <div className="mt-2 ml-6 pl-4 border-l-2 border-violet-100 flex flex-col gap-2">
+          {replies.map((reply: any) => (
+            <ReplyCommentsCard
+              key={reply.id}
+              comment={reply}
+              isReply={isReply}
               setIsReply={setIsReply}
-              isReply
               setReplyUserName={setReplyUserName}
               setReplyId={setReplyId}
             />
           ))}
         </div>
       )}
-    </>
+    </div>
   );
 };
 
